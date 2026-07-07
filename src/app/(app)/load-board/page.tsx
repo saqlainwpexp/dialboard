@@ -4,6 +4,8 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import { PhoneCall, ListChecks, Clock } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { PriorityBadge } from "@/components/ui/Badge";
+import { TimezoneWarning } from "@/components/ui/TimezoneWarning";
+import { StaleBadge } from "@/components/ui/StaleBadge";
 import { CallLogModal } from "@/components/CallLogModal";
 import type { LeadRow } from "@/types";
 
@@ -67,7 +69,10 @@ export default function LoadBoardPage() {
         <Card className="p-6 border-2 border-accent-blue/20">
           <div className="flex items-center justify-between mb-4">
             <span className="text-xs font-bold uppercase tracking-wide text-accent-blue">Up next</span>
-            <PriorityBadge priority={upNext.priority} />
+            <div className="flex items-center gap-1.5">
+              <StaleBadge lead={upNext} />
+              <PriorityBadge priority={upNext.priority} />
+            </div>
           </div>
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
@@ -88,6 +93,9 @@ export default function LoadBoardPage() {
                   {new Date(upNext.nextActionAt).toLocaleString()}
                 </div>
               )}
+              <div className="mt-2">
+                <TimezoneWarning timezone={upNext.timezone} />
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <a
@@ -121,6 +129,8 @@ export default function LoadBoardPage() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
+                <TimezoneWarning timezone={lead.timezone} />
+                <StaleBadge lead={lead} />
                 <PriorityBadge priority={lead.priority} />
                 <button
                   onClick={() => setCallLead(lead)}

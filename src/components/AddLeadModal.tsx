@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Field, inputClass } from "@/components/ui/FormField";
+import { COMMON_TIMEZONES } from "@/lib/timezones";
 import type { LeadRow, AdditionalPhone, CustomField } from "@/types";
 
 type CampaignOption = { _id: string; name: string };
@@ -208,12 +209,21 @@ export function AddLeadModal({
             />
           </Field>
           <Field label="Timezone">
-            <input
+            <select
               value={form.timezone}
               onChange={(e) => update("timezone", e.target.value)}
               className={inputClass}
-              placeholder="e.g. ET, PT"
-            />
+            >
+              <option value="">Unknown</option>
+              {form.timezone && !COMMON_TIMEZONES.some((tz) => tz.value === form.timezone) && (
+                <option value={form.timezone}>{form.timezone}</option>
+              )}
+              {COMMON_TIMEZONES.map((tz) => (
+                <option key={tz.value} value={tz.value}>
+                  {tz.label}
+                </option>
+              ))}
+            </select>
           </Field>
         </div>
         <div className="grid grid-cols-2 gap-4">

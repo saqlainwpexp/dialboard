@@ -19,6 +19,7 @@ import {
 import { Card } from "@/components/ui/Card";
 import { StatusBadge, PriorityBadge } from "@/components/ui/Badge";
 import { DispositionBadge } from "@/components/ui/DispositionBadge";
+import { TimezoneWarning } from "@/components/ui/TimezoneWarning";
 import { AddLeadModal } from "@/components/AddLeadModal";
 import { CallLogModal } from "@/components/CallLogModal";
 import { OBJECTION_LABELS } from "@/lib/labels";
@@ -170,6 +171,7 @@ export default function LeadDetailPage() {
               <Globe size={15} className="text-muted-2" /> {lead.timezone}
             </div>
           )}
+          <TimezoneWarning timezone={lead.timezone} />
           <div className="text-sm text-foreground">
             Campaign: <span className="text-muted">{lead.campaign?.name ?? "—"}</span>
           </div>

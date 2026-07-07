@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Plus, Upload, Download, Search, PhoneCall, Trash2, X } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { StatusBadge, PriorityBadge } from "@/components/ui/Badge";
+import { StaleBadge } from "@/components/ui/StaleBadge";
 import { AddLeadModal } from "@/components/AddLeadModal";
 import { ImportCsvModal } from "@/components/ImportCsvModal";
 import { CallLogModal } from "@/components/CallLogModal";
@@ -311,7 +312,10 @@ export default function LeadsPage() {
                   </a>
                 </td>
                 <td className="px-5 py-3">
-                  <StatusBadge status={lead.status} />
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <StatusBadge status={lead.status} />
+                    <StaleBadge lead={lead} />
+                  </div>
                 </td>
                 <td className="px-5 py-3">
                   <PriorityBadge priority={lead.priority} />

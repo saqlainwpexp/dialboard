@@ -5,6 +5,7 @@ import { PhoneCall } from "lucide-react";
 import clsx from "clsx";
 import { Modal } from "@/components/ui/Modal";
 import { Field, inputClass } from "@/components/ui/FormField";
+import { TimezoneWarning } from "@/components/ui/TimezoneWarning";
 
 const DISPOSITIONS = [
   { value: "no_answer", label: "No Answer" },
@@ -38,7 +39,7 @@ export function CallLogModal({
 }: {
   open: boolean;
   onClose: () => void;
-  lead: { _id: string; name: string; phone: string } | null;
+  lead: { _id: string; name: string; phone: string; timezone?: string } | null;
   onLogged: () => void;
 }) {
   const [scripts, setScripts] = useState<ScriptOption[]>([]);
@@ -105,12 +106,15 @@ export function CallLogModal({
 
   return (
     <Modal open={open} onClose={onClose} title={`Log call — ${lead.name}`}>
-      <a
-        href={`tel:${lead.phone}`}
-        className="text-sm text-accent-blue font-medium -mt-2 mb-4 inline-flex items-center gap-1.5 hover:underline"
-      >
-        <PhoneCall size={13} /> {lead.phone}
-      </a>
+      <div className="flex items-center gap-3 -mt-2 mb-4 flex-wrap">
+        <a
+          href={`tel:${lead.phone}`}
+          className="text-sm text-accent-blue font-medium inline-flex items-center gap-1.5 hover:underline"
+        >
+          <PhoneCall size={13} /> {lead.phone}
+        </a>
+        {lead.timezone && <TimezoneWarning timezone={lead.timezone} />}
+      </div>
       <form onSubmit={handleSubmit} className="space-y-4">
         <Field label="Disposition">
           <div className="grid grid-cols-2 gap-2">
