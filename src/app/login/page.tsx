@@ -6,18 +6,31 @@ import { PhoneCall } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [mode, setMode] = useState<"loading" | "register" | "login">("loading");
+  const [mode, setMode] = useState<"loading" | "register" | "login" | "error">("loading");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [statusError, setStatusError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
+  function checkStatus() {
+    setMode("loading");
+    setStatusError("");
     fetch("/api/auth/status")
-      .then((res) => res.json())
-      .then((data) => setMode(data.hasUser ? "login" : "register"))
-      .catch(() => setMode("login"));
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail ?? data.error ?? "Request failed.");
+        setMode(data.hasUser ? "login" : "register");
+      })
+      .catch((err) => {
+        setStatusError(err instanceof Error ? err.message : "Could not reach the server.");
+        setMode("error");
+      });
+  }
+
+  useEffect(() => {
+    checkStatus();
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -50,6 +63,35 @@ export default function LoginPage() {
 
   if (mode === "loading") {
     return <div className="min-h-screen flex items-center justify-center bg-background" />;
+  }
+
+  if (mode === "error") {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center bg-background px-4">
+        <div className="w-full max-w-sm">
+          <div className="flex items-center gap-3 mb-8 justify-center">
+            <div className="w-10 h-10 rounded-full grad-warm flex items-center justify-center text-white">
+              <PhoneCall size={18} />
+            </div>
+            <span className="text-xl font-bold text-foreground">DialBoard</span>
+          </div>
+          <div className="bg-surface rounded-3xl card-shadow p-8">
+            <h1 className="text-lg font-bold text-red-500 mb-1">Can&apos;t reach the database</h1>
+            <p className="text-sm text-muted mb-4 break-words">{statusError}</p>
+            <p className="text-xs text-muted-2 mb-4">
+              Check that MONGODB_URI is set correctly and that your Atlas cluster&apos;s Network Access
+              allows connections from this server (0.0.0.0/0).
+            </p>
+            <button
+              onClick={checkStatus}
+              className="w-full rounded-xl bg-accent-blue text-white text-sm font-semibold py-2.5 hover:opacity-90 transition"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
