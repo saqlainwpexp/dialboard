@@ -10,6 +10,7 @@ export async function GET(request: NextRequest) {
   const campaign = searchParams.get("campaign");
   const search = searchParams.get("search");
   const dueBefore = searchParams.get("dueBefore");
+  const hasNextAction = searchParams.get("hasNextAction");
 
   const query: Record<string, unknown> = {};
   const and: Record<string, unknown>[] = [];
@@ -19,6 +20,7 @@ export async function GET(request: NextRequest) {
     query.status = statuses.length > 1 ? { $in: statuses } : statuses[0];
   }
   if (campaign) query.campaign = campaign;
+  if (hasNextAction) query.nextActionAt = { $ne: null };
   if (dueBefore) {
     and.push({
       $or: [
@@ -39,7 +41,7 @@ export async function GET(request: NextRequest) {
   if (and.length > 0) query.$and = and;
 
   const leads = await Lead.find(query)
-    .sort({ createdAt: -1 })
+    .sort(hasNextAction ? { nextActionAt: 1 } : { createdAt: -1 })
     .populate("campaign", "name color")
     .lean();
 

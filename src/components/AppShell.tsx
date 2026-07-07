@@ -2,14 +2,16 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutGrid, ListChecks, Users, Megaphone, FileText, Search, LogOut, PhoneCall, History } from "lucide-react";
+import { LayoutGrid, ListChecks, Users, Megaphone, FileText, LogOut, PhoneCall, History, CalendarClock, Settings } from "lucide-react";
 import clsx from "clsx";
+import { HeaderSearch } from "@/components/HeaderSearch";
 
 const NAV = [
   { href: "/", label: "Dashboard", icon: LayoutGrid },
   { href: "/load-board", label: "Load Board", icon: ListChecks },
   { href: "/leads", label: "Leads", icon: Users },
   { href: "/calls", label: "Calls", icon: History },
+  { href: "/follow-ups", label: "Follow-ups", icon: CalendarClock },
   { href: "/campaigns", label: "Campaigns", icon: Megaphone },
   { href: "/scripts", label: "Scripts", icon: FileText },
 ];
@@ -47,13 +49,7 @@ export function AppShell({
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-2 bg-surface rounded-full px-4 py-2.5 card-shadow w-64">
-              <Search size={16} className="text-muted-2" />
-              <input
-                placeholder="Search leads, campaigns…"
-                className="bg-transparent text-sm outline-none placeholder:text-muted-2 w-full"
-              />
-            </div>
+            <HeaderSearch />
             <a
               href="https://phone.zoom.us"
               target="_blank"
@@ -63,6 +59,13 @@ export function AppShell({
             >
               <PhoneCall size={15} /> Zoom Phone
             </a>
+            <Link
+              href="/settings"
+              title="Settings"
+              className="w-10 h-10 rounded-full bg-surface card-shadow flex items-center justify-center text-muted hover:text-foreground transition"
+            >
+              <Settings size={16} />
+            </Link>
             <button
               onClick={handleLogout}
               title="Log out"
