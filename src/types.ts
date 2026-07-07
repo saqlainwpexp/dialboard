@@ -31,6 +31,10 @@ export type CallRow = {
   calledAt: string;
 };
 
+export type CallWithLead = Omit<CallRow, "lead"> & {
+  lead: { _id: string; name: string; phone: string; company: string } | null;
+};
+
 export type CampaignRow = {
   _id: string;
   name: string;

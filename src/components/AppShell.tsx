@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutGrid, ListChecks, Users, Megaphone, FileText, Search, LogOut, PhoneCall } from "lucide-react";
+import { LayoutGrid, ListChecks, Users, Megaphone, FileText, Search, LogOut, PhoneCall, History } from "lucide-react";
 import clsx from "clsx";
 
 const NAV = [
   { href: "/", label: "Dashboard", icon: LayoutGrid },
   { href: "/load-board", label: "Load Board", icon: ListChecks },
   { href: "/leads", label: "Leads", icon: Users },
+  { href: "/calls", label: "Calls", icon: History },
   { href: "/campaigns", label: "Campaigns", icon: Megaphone },
   { href: "/scripts", label: "Scripts", icon: FileText },
 ];

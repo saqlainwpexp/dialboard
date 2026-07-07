@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
 import { Plus, Upload, Search, PhoneCall, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { StatusBadge, PriorityBadge } from "@/components/ui/Badge";
@@ -120,7 +121,9 @@ export default function LeadsPage() {
             {leads.map((lead) => (
               <tr key={lead._id} className="hover:bg-background/60 transition">
                 <td className="px-5 py-3">
-                  <div className="font-semibold text-foreground">{lead.name}</div>
+                  <Link href={`/leads/${lead._id}`} className="font-semibold text-foreground hover:text-accent-blue hover:underline">
+                    {lead.name}
+                  </Link>
                   <div className="text-xs text-muted">
                     {lead.company}
                     {lead.title ? ` · ${lead.title}` : ""}

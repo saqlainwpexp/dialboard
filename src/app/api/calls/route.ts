@@ -18,13 +18,28 @@ export async function GET(request: NextRequest) {
   await connectDB();
   const { searchParams } = new URL(request.url);
   const leadId = searchParams.get("leadId");
+  const disposition = searchParams.get("disposition");
+  const campaign = searchParams.get("campaign");
+  const script = searchParams.get("script");
+  const from = searchParams.get("from");
+  const to = searchParams.get("to");
 
   const query: Record<string, unknown> = {};
   if (leadId) query.lead = leadId;
+  if (disposition) query.disposition = disposition;
+  if (campaign) query.campaign = campaign;
+  if (script) query.script = script;
+  if (from || to) {
+    const calledAt: Record<string, Date> = {};
+    if (from) calledAt.$gte = new Date(from);
+    if (to) calledAt.$lte = new Date(to);
+    query.calledAt = calledAt;
+  }
 
   const calls = await Call.find(query)
     .sort({ calledAt: -1 })
     .populate("script", "name")
+    .populate("lead", "name phone company")
     .lean();
 
   return NextResponse.json({ calls });
