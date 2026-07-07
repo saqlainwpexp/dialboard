@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Settings as SettingsIcon, KeyRound } from "lucide-react";
+import { Settings as SettingsIcon, KeyRound, DatabaseBackup } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Field, inputClass } from "@/components/ui/FormField";
 
@@ -145,6 +145,21 @@ export default function SettingsPage() {
             {savingPassword ? "Saving…" : "Update password"}
           </button>
         </form>
+      </Card>
+
+      <Card className="p-6">
+        <h2 className="font-bold text-foreground mb-1 flex items-center gap-2">
+          <DatabaseBackup size={16} className="text-muted-2" /> Data backup
+        </h2>
+        <p className="text-sm text-muted mb-4">
+          Download everything — leads, call history, campaigns, and scripts — as a single JSON file.
+        </p>
+        <a
+          href="/api/export"
+          className="inline-block rounded-xl bg-accent-blue text-white text-sm font-semibold py-2.5 px-6 hover:opacity-90 transition"
+        >
+          Download full backup
+        </a>
       </Card>
     </div>
   );

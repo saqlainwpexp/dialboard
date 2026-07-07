@@ -6,6 +6,7 @@ import { LayoutGrid, ListChecks, Users, Megaphone, FileText, LogOut, PhoneCall, 
 import clsx from "clsx";
 import { HeaderSearch } from "@/components/HeaderSearch";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { FollowUpBadge } from "@/components/FollowUpBadge";
 
 const NAV = [
   { href: "/", label: "Dashboard", icon: LayoutGrid },
@@ -97,6 +98,7 @@ export function AppShell({
               >
                 <Icon size={15} />
                 {item.label}
+                {item.href === "/follow-ups" && <FollowUpBadge />}
               </Link>
             );
           })}
