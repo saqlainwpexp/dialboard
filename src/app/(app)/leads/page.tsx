@@ -126,7 +126,14 @@ export default function LeadsPage() {
                     {lead.title ? ` · ${lead.title}` : ""}
                   </div>
                 </td>
-                <td className="px-5 py-3 text-foreground">{lead.phone}</td>
+                <td className="px-5 py-3">
+                  <a
+                    href={`tel:${lead.phone}`}
+                    className="text-foreground font-medium hover:text-accent-blue hover:underline"
+                  >
+                    {lead.phone}
+                  </a>
+                </td>
                 <td className="px-5 py-3">
                   <StatusBadge status={lead.status} />
                 </td>

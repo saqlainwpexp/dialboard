@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { PhoneCall } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Field, inputClass } from "@/components/ui/FormField";
 
@@ -89,7 +90,12 @@ export function CallLogModal({
 
   return (
     <Modal open={open} onClose={onClose} title={`Log call — ${lead.name}`}>
-      <p className="text-sm text-muted -mt-2 mb-4">{lead.phone}</p>
+      <a
+        href={`tel:${lead.phone}`}
+        className="text-sm text-accent-blue font-medium -mt-2 mb-4 inline-flex items-center gap-1.5 hover:underline"
+      >
+        <PhoneCall size={13} /> {lead.phone}
+      </a>
       <form onSubmit={handleSubmit} className="space-y-4">
         <Field label="Disposition">
           <select

@@ -53,6 +53,15 @@ export function AppShell({
                 className="bg-transparent text-sm outline-none placeholder:text-muted-2 w-full"
               />
             </div>
+            <a
+              href="https://phone.zoom.us"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Open Zoom Phone in a new tab"
+              className="flex items-center gap-2 bg-surface card-shadow rounded-full px-4 py-2.5 text-sm font-semibold text-foreground hover:opacity-80 transition"
+            >
+              <PhoneCall size={15} /> Zoom Phone
+            </a>
             <button
               onClick={handleLogout}
               title="Log out"

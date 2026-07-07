@@ -76,7 +76,12 @@ export default function LoadBoardPage() {
                 {upNext.company}
                 {upNext.title ? ` · ${upNext.title}` : ""}
               </div>
-              <div className="text-sm text-foreground font-semibold mt-2">{upNext.phone}</div>
+              <a
+                href={`tel:${upNext.phone}`}
+                className="text-sm text-foreground font-semibold mt-2 block hover:text-accent-blue hover:underline"
+              >
+                {upNext.phone}
+              </a>
               {upNext.nextActionAt && (
                 <div className="text-xs text-amber-600 flex items-center gap-1 mt-1">
                   <Clock size={12} /> Callback was due{" "}
@@ -109,7 +114,10 @@ export default function LoadBoardPage() {
               <div>
                 <div className="font-semibold text-foreground text-sm">{lead.name}</div>
                 <div className="text-xs text-muted">
-                  {lead.company} · {lead.phone}
+                  {lead.company} ·{" "}
+                  <a href={`tel:${lead.phone}`} className="hover:text-accent-blue hover:underline">
+                    {lead.phone}
+                  </a>
                 </div>
               </div>
               <div className="flex items-center gap-2">
