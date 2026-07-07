@@ -130,7 +130,18 @@ export default function LeadDetailPage() {
             className="flex items-center gap-2.5 text-sm text-foreground hover:text-accent-blue"
           >
             <PhoneCall size={15} className="text-muted-2" /> {lead.phone}
+            <span className="text-xs text-muted-2">(primary)</span>
           </a>
+          {lead.additionalPhones?.map((p, i) => (
+            <a
+              key={i}
+              href={`tel:${p.number}`}
+              className="flex items-center gap-2.5 text-sm text-foreground hover:text-accent-blue"
+            >
+              <PhoneCall size={15} className="text-muted-2" /> {p.number}
+              {p.label && <span className="text-xs text-muted-2">({p.label})</span>}
+            </a>
+          ))}
           {lead.email && (
             <a
               href={`mailto:${lead.email}`}
@@ -165,6 +176,15 @@ export default function LeadDetailPage() {
           {lead.nextActionAt && (
             <div className="flex items-center gap-2.5 text-sm text-amber-600">
               <Clock size={15} /> Next action: {format(new Date(lead.nextActionAt), "EEE, MMM d, h:mm a")}
+            </div>
+          )}
+          {lead.customFields?.length > 0 && (
+            <div className="pt-3 border-t border-border space-y-1.5">
+              {lead.customFields.map((f, i) => (
+                <div key={i} className="text-sm text-foreground">
+                  <span className="text-muted-2">{f.key}:</span> {f.value}
+                </div>
+              ))}
             </div>
           )}
           {lead.notes && (

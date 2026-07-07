@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { LayoutGrid, ListChecks, Users, Megaphone, FileText, LogOut, PhoneCall, History, CalendarClock, Settings, BarChart3 } from "lucide-react";
 import clsx from "clsx";
 import { HeaderSearch } from "@/components/HeaderSearch";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const NAV = [
   { href: "/", label: "Dashboard", icon: LayoutGrid },
@@ -67,6 +68,7 @@ export function AppShell({
             >
               <Settings size={16} />
             </Link>
+            <ThemeToggle />
             <button
               onClick={handleLogout}
               title="Log out"

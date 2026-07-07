@@ -28,6 +28,14 @@ const LeadSchema = new Schema(
     notes: { type: String, default: "" },
     lastCalledAt: { type: Date, default: null },
     nextActionAt: { type: Date, default: null },
+    additionalPhones: {
+      type: [{ label: { type: String, default: "" }, number: { type: String, required: true } }],
+      default: [],
+    },
+    customFields: {
+      type: [{ key: { type: String, required: true }, value: { type: String, default: "" } }],
+      default: [],
+    },
   },
   { timestamps: true }
 );

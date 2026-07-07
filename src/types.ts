@@ -1,5 +1,8 @@
 export type CampaignRef = { _id: string; name: string; color?: string } | null;
 
+export type AdditionalPhone = { label: string; number: string };
+export type CustomField = { key: string; value: string };
+
 export type LeadRow = {
   _id: string;
   name: string;
@@ -14,6 +17,8 @@ export type LeadRow = {
   priority: string;
   campaign: CampaignRef;
   notes: string;
+  additionalPhones: AdditionalPhone[];
+  customFields: CustomField[];
   lastCalledAt: string | null;
   nextActionAt: string | null;
   createdAt: string;

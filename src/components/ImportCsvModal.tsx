@@ -34,7 +34,11 @@ export function ImportCsvModal({
   const [mapping, setMapping] = useState<Record<string, string>>({});
   const [fileName, setFileName] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [result, setResult] = useState<{ imported: number; skipped: number } | null>(null);
+  const [result, setResult] = useState<{
+    imported: number;
+    skippedMissingFields: number;
+    skippedDuplicates: number;
+  } | null>(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -180,8 +184,17 @@ export function ImportCsvModal({
           <p className="text-lg font-bold text-foreground">
             Imported {result.imported} lead{result.imported === 1 ? "" : "s"}
           </p>
-          {result.skipped > 0 && (
-            <p className="text-sm text-muted mt-1">{result.skipped} rows skipped (missing name/phone).</p>
+          {result.skippedMissingFields > 0 && (
+            <p className="text-sm text-muted mt-1">
+              {result.skippedMissingFields} row{result.skippedMissingFields === 1 ? "" : "s"} skipped
+              (missing name/phone).
+            </p>
+          )}
+          {result.skippedDuplicates > 0 && (
+            <p className="text-sm text-muted mt-1">
+              {result.skippedDuplicates} row{result.skippedDuplicates === 1 ? "" : "s"} skipped as
+              duplicates (matching phone or email already in your leads).
+            </p>
           )}
           <button
             onClick={onClose}

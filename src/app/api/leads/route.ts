@@ -68,6 +68,8 @@ export async function POST(request: NextRequest) {
     priority: body.priority ?? "medium",
     campaign: body.campaign || null,
     notes: body.notes ?? "",
+    additionalPhones: Array.isArray(body.additionalPhones) ? body.additionalPhones : [],
+    customFields: Array.isArray(body.customFields) ? body.customFields : [],
   });
 
   return NextResponse.json({ lead });

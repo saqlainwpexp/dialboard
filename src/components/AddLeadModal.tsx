@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Plus, Trash2 } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Field, inputClass } from "@/components/ui/FormField";
-import type { LeadRow } from "@/types";
+import type { LeadRow, AdditionalPhone, CustomField } from "@/types";
 
 type CampaignOption = { _id: string; name: string };
 
@@ -35,6 +36,8 @@ export function AddLeadModal({
   const isEdit = !!lead;
   const [campaigns, setCampaigns] = useState<CampaignOption[]>([]);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [additionalPhones, setAdditionalPhones] = useState<AdditionalPhone[]>([]);
+  const [customFields, setCustomFields] = useState<CustomField[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -60,12 +63,22 @@ export function AddLeadModal({
             }
           : EMPTY_FORM
       );
+      setAdditionalPhones(lead?.additionalPhones ?? []);
+      setCustomFields(lead?.customFields ?? []);
       setError("");
     }
   }, [open, lead]);
 
   function update(key: string, value: string) {
     setForm((f) => ({ ...f, [key]: value }));
+  }
+
+  function updatePhoneRow(index: number, key: keyof AdditionalPhone, value: string) {
+    setAdditionalPhones((rows) => rows.map((r, i) => (i === index ? { ...r, [key]: value } : r)));
+  }
+
+  function updateFieldRow(index: number, key: keyof CustomField, value: string) {
+    setCustomFields((rows) => rows.map((r, i) => (i === index ? { ...r, [key]: value } : r)));
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -75,7 +88,11 @@ export function AddLeadModal({
     const res = await fetch(isEdit ? `/api/leads/${lead!._id}` : "/api/leads", {
       method: isEdit ? "PATCH" : "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify({
+        ...form,
+        additionalPhones: additionalPhones.filter((p) => p.number.trim()),
+        customFields: customFields.filter((f) => f.key.trim()),
+      }),
     });
     setSubmitting(false);
     if (!res.ok) {
@@ -109,6 +126,45 @@ export function AddLeadModal({
             />
           </Field>
         </div>
+
+        <div>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="text-xs font-semibold text-muted-2">Additional phone numbers</label>
+            <button
+              type="button"
+              onClick={() => setAdditionalPhones((rows) => [...rows, { label: "", number: "" }])}
+              className="text-xs font-semibold text-accent-blue hover:underline flex items-center gap-1"
+            >
+              <Plus size={12} /> Add
+            </button>
+          </div>
+          <div className="space-y-2">
+            {additionalPhones.map((row, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <input
+                  value={row.label}
+                  onChange={(e) => updatePhoneRow(i, "label", e.target.value)}
+                  placeholder="Mobile, Office…"
+                  className={`${inputClass} w-32 shrink-0`}
+                />
+                <input
+                  value={row.number}
+                  onChange={(e) => updatePhoneRow(i, "number", e.target.value)}
+                  placeholder="+1 555 123 4567"
+                  className={inputClass}
+                />
+                <button
+                  type="button"
+                  onClick={() => setAdditionalPhones((rows) => rows.filter((_, idx) => idx !== i))}
+                  className="w-8 h-8 rounded-full bg-background flex items-center justify-center text-muted hover:text-red-500 transition shrink-0"
+                >
+                  <Trash2 size={13} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
         <div className="grid grid-cols-2 gap-4">
           <Field label="Company">
             <input
@@ -186,6 +242,44 @@ export function AddLeadModal({
               ))}
             </select>
           </Field>
+        </div>
+
+        <div>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="text-xs font-semibold text-muted-2">Custom fields</label>
+            <button
+              type="button"
+              onClick={() => setCustomFields((rows) => [...rows, { key: "", value: "" }])}
+              className="text-xs font-semibold text-accent-blue hover:underline flex items-center gap-1"
+            >
+              <Plus size={12} /> Add
+            </button>
+          </div>
+          <div className="space-y-2">
+            {customFields.map((row, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <input
+                  value={row.key}
+                  onChange={(e) => updateFieldRow(i, "key", e.target.value)}
+                  placeholder="LinkedIn URL, Company size…"
+                  className={`${inputClass} w-40 shrink-0`}
+                />
+                <input
+                  value={row.value}
+                  onChange={(e) => updateFieldRow(i, "value", e.target.value)}
+                  placeholder="Value"
+                  className={inputClass}
+                />
+                <button
+                  type="button"
+                  onClick={() => setCustomFields((rows) => rows.filter((_, idx) => idx !== i))}
+                  className="w-8 h-8 rounded-full bg-background flex items-center justify-center text-muted hover:text-red-500 transition shrink-0"
+                >
+                  <Trash2 size={13} />
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
 
         <Field label="Notes">
