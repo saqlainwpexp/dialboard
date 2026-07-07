@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { PhoneCall } from "lucide-react";
+import clsx from "clsx";
 import { Modal } from "@/components/ui/Modal";
 import { Field, inputClass } from "@/components/ui/FormField";
 
@@ -63,6 +64,20 @@ export function CallLogModal({
     }
   }, [open]);
 
+  useEffect(() => {
+    if (!open) return;
+    function handleKeyDown(e: KeyboardEvent) {
+      const tag = (document.activeElement as HTMLElement | null)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      const index = parseInt(e.key, 10) - 1;
+      if (index >= 0 && index < DISPOSITIONS.length) {
+        setDisposition(DISPOSITIONS[index].value);
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [open]);
+
   if (!lead) return null;
 
   const needsFollowUp = disposition === "callback_requested" || disposition === "meeting_booked";
@@ -98,17 +113,31 @@ export function CallLogModal({
       </a>
       <form onSubmit={handleSubmit} className="space-y-4">
         <Field label="Disposition">
-          <select
-            value={disposition}
-            onChange={(e) => setDisposition(e.target.value)}
-            className={inputClass}
-          >
-            {DISPOSITIONS.map((d) => (
-              <option key={d.value} value={d.value}>
+          <div className="grid grid-cols-2 gap-2">
+            {DISPOSITIONS.map((d, i) => (
+              <button
+                key={d.value}
+                type="button"
+                onClick={() => setDisposition(d.value)}
+                className={clsx(
+                  "flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition text-left",
+                  disposition === d.value
+                    ? "bg-accent-blue text-white"
+                    : "bg-background text-foreground hover:bg-border/60"
+                )}
+              >
+                <span
+                  className={clsx(
+                    "w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0",
+                    disposition === d.value ? "bg-white/25" : "bg-border text-muted-2"
+                  )}
+                >
+                  {i + 1}
+                </span>
                 {d.label}
-              </option>
+              </button>
             ))}
-          </select>
+          </div>
         </Field>
 
         <div className="grid grid-cols-2 gap-4">

@@ -3,11 +3,12 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
-import { PhoneCall as PhoneCallIcon, Pencil, Trash2 } from "lucide-react";
+import { PhoneCall as PhoneCallIcon, Pencil, Trash2, Download } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { DispositionBadge } from "@/components/ui/DispositionBadge";
 import { EditCallModal } from "@/components/EditCallModal";
-import { OBJECTION_LABELS } from "@/lib/labels";
+import { OBJECTION_LABELS, DISPOSITION_LABELS } from "@/lib/labels";
+import { downloadCsv } from "@/lib/csv";
 import type { CallWithLead } from "@/types";
 
 const DISPOSITION_FILTERS = [
@@ -52,11 +53,46 @@ export default function CallsPage() {
     load();
   }
 
+  function handleExport() {
+    downloadCsv(
+      `calls-${new Date().toISOString().slice(0, 10)}.csv`,
+      calls.map((c) => ({
+        date: format(new Date(c.calledAt), "yyyy-MM-dd HH:mm"),
+        lead: c.lead?.name ?? "",
+        phone: c.lead?.phone ?? "",
+        disposition: DISPOSITION_LABELS[c.disposition] ?? c.disposition,
+        script: c.script?.name ?? "",
+        objection: c.objection ? OBJECTION_LABELS[c.objection] ?? c.objection : "",
+        durationMinutes: c.durationSeconds ? Math.round(c.durationSeconds / 60) : 0,
+        notes: c.notes,
+      })),
+      [
+        { key: "date", header: "Date" },
+        { key: "lead", header: "Lead" },
+        { key: "phone", header: "Phone" },
+        { key: "disposition", header: "Disposition" },
+        { key: "script", header: "Script" },
+        { key: "objection", header: "Objection" },
+        { key: "durationMinutes", header: "Duration (min)" },
+        { key: "notes", header: "Notes" },
+      ]
+    );
+  }
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-bold text-foreground">Call History</h1>
-        <p className="text-sm text-muted">{calls.length} calls logged</p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-bold text-foreground">Call History</h1>
+          <p className="text-sm text-muted">{calls.length} calls logged</p>
+        </div>
+        <button
+          onClick={handleExport}
+          disabled={calls.length === 0}
+          className="flex items-center gap-2 bg-surface card-shadow rounded-full px-4 py-2.5 text-sm font-semibold text-foreground hover:opacity-80 transition disabled:opacity-40"
+        >
+          <Download size={15} /> Export CSV
+        </button>
       </div>
 
       <Card className="p-4 flex flex-wrap items-center gap-3">

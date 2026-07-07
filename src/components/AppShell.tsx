@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutGrid, ListChecks, Users, Megaphone, FileText, LogOut, PhoneCall, History, CalendarClock, Settings } from "lucide-react";
+import { LayoutGrid, ListChecks, Users, Megaphone, FileText, LogOut, PhoneCall, History, CalendarClock, Settings, BarChart3 } from "lucide-react";
 import clsx from "clsx";
 import { HeaderSearch } from "@/components/HeaderSearch";
 
@@ -12,6 +12,7 @@ const NAV = [
   { href: "/leads", label: "Leads", icon: Users },
   { href: "/calls", label: "Calls", icon: History },
   { href: "/follow-ups", label: "Follow-ups", icon: CalendarClock },
+  { href: "/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/campaigns", label: "Campaigns", icon: Megaphone },
   { href: "/scripts", label: "Scripts", icon: FileText },
 ];
