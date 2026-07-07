@@ -1,0 +1,50 @@
+export type CampaignRef = { _id: string; name: string; color?: string } | null;
+
+export type LeadRow = {
+  _id: string;
+  name: string;
+  company: string;
+  title: string;
+  phone: string;
+  email: string;
+  source: string;
+  industry: string;
+  timezone: string;
+  status: string;
+  priority: string;
+  campaign: CampaignRef;
+  notes: string;
+  lastCalledAt: string | null;
+  nextActionAt: string | null;
+  createdAt: string;
+};
+
+export type CallRow = {
+  _id: string;
+  lead: string;
+  script: { _id: string; name: string } | null;
+  disposition: string;
+  durationSeconds: number;
+  objection: string | null;
+  notes: string;
+  nextActionAt: string | null;
+  calledAt: string;
+};
+
+export type CampaignRow = {
+  _id: string;
+  name: string;
+  description: string;
+  color: string;
+  archived: boolean;
+  createdAt: string;
+};
+
+export type ScriptRow = {
+  _id: string;
+  name: string;
+  version: string;
+  body: string;
+  archived: boolean;
+  createdAt: string;
+};
