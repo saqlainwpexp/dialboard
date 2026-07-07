@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutGrid, ListChecks, Users, Megaphone, FileText, LogOut, PhoneCall, History, CalendarClock, Settings, BarChart3 } from "lucide-react";
+import { LayoutGrid, ListChecks, Users, Megaphone, FileText, LogOut, PhoneCall, History, CalendarClock, Settings, BarChart3, Workflow } from "lucide-react";
 import clsx from "clsx";
 import { HeaderSearch } from "@/components/HeaderSearch";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -10,6 +10,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 const NAV = [
   { href: "/", label: "Dashboard", icon: LayoutGrid },
   { href: "/load-board", label: "Load Board", icon: ListChecks },
+  { href: "/pipeline", label: "Pipeline", icon: Workflow },
   { href: "/leads", label: "Leads", icon: Users },
   { href: "/calls", label: "Calls", icon: History },
   { href: "/follow-ups", label: "Follow-ups", icon: CalendarClock },
