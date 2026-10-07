@@ -12,12 +12,17 @@ const CONNECTED_DISPOSITIONS = [
   "meeting_booked",
 ];
 
-export async function getDashboardStats(dailyCallGoal: number) {
+export async function getDashboardStats(dailyCallGoal: number, scope?: { userId?: string }) {
   await connectDB();
 
   const now = new Date();
   const todayStart = startOfDay(now);
   const windowStart = subDays(todayStart, 13);
+
+  // When scoped to a caller, calls are filtered by who made them and leads by
+  // who they're assigned to. Managers (no scope) see the whole workspace.
+  const callScope: Record<string, unknown> = scope?.userId ? { calledBy: scope.userId } : {};
+  const leadScope: Record<string, unknown> = scope?.userId ? { assignedTo: scope.userId } : {};
 
   const [
     totalLeads,
@@ -30,19 +35,19 @@ export async function getDashboardStats(dailyCallGoal: number) {
     connects30d,
     meetings30d,
   ] = await Promise.all([
-    Lead.countDocuments({}),
+    Lead.countDocuments({ ...leadScope }),
     Campaign.find({ archived: false }).sort({ createdAt: -1 }).limit(6).lean(),
-    Call.countDocuments({ calledAt: { $gte: todayStart } }),
-    Call.find({ calledAt: { $gte: windowStart } })
+    Call.countDocuments({ ...callScope, calledAt: { $gte: todayStart } }),
+    Call.find({ ...callScope, calledAt: { $gte: windowStart } })
       .select("calledAt disposition")
       .lean(),
-    Lead.find({ nextActionAt: { $ne: null, $lte: addDays(now, 7) } })
+    Lead.find({ ...leadScope, nextActionAt: { $ne: null, $lte: addDays(now, 7) } })
       .sort({ nextActionAt: 1 })
       .limit(6)
       .populate("campaign", "name color")
       .lean(),
     Call.aggregate([
-      { $match: { calledAt: { $gte: subDays(todayStart, 30) }, script: { $ne: null } } },
+      { $match: { ...callScope, calledAt: { $gte: subDays(todayStart, 30) }, script: { $ne: null } } },
       {
         $group: {
           _id: "$script",
@@ -55,12 +60,14 @@ export async function getDashboardStats(dailyCallGoal: number) {
       { $sort: { total: -1 } },
       { $limit: 5 },
     ]),
-    Call.countDocuments({ calledAt: { $gte: subDays(todayStart, 30) } }),
+    Call.countDocuments({ ...callScope, calledAt: { $gte: subDays(todayStart, 30) } }),
     Call.countDocuments({
+      ...callScope,
       calledAt: { $gte: subDays(todayStart, 30) },
       disposition: { $in: CONNECTED_DISPOSITIONS },
     }),
     Call.countDocuments({
+      ...callScope,
       calledAt: { $gte: subDays(todayStart, 30) },
       disposition: "meeting_booked",
     }),

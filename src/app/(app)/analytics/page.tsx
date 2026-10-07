@@ -1,14 +1,28 @@
-import { BarChart3, MessageSquareWarning, Clock, Tag } from "lucide-react";
+import { BarChart3, MessageSquareWarning, Clock, Tag, Trophy } from "lucide-react";
+import { redirect } from "next/navigation";
+import { getSession } from "@/lib/auth";
 import { Card } from "@/components/ui/Card";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { TimeOfDayChart } from "@/components/analytics/TimeOfDayChart";
-import { getObjectionBreakdown, getTimeOfDayBreakdown, getSourceBreakdown } from "@/lib/analytics";
+import {
+  getObjectionBreakdown,
+  getTimeOfDayBreakdown,
+  getSourceBreakdown,
+  getTeamLeaderboard,
+} from "@/lib/analytics";
 
 export default async function AnalyticsPage() {
-  const [objections, timeOfDay, sources] = await Promise.all([
-    getObjectionBreakdown(),
-    getTimeOfDayBreakdown(),
-    getSourceBreakdown(),
+  const session = await getSession();
+  if (!session) redirect("/login");
+
+  const isManager = session.role === "manager";
+  const scope = isManager ? undefined : { userId: session.userId };
+
+  const [objections, timeOfDay, sources, leaderboard] = await Promise.all([
+    getObjectionBreakdown(scope),
+    getTimeOfDayBreakdown(scope),
+    getSourceBreakdown(scope),
+    isManager ? getTeamLeaderboard() : Promise.resolve([]),
   ]);
 
   const bestDay = [...timeOfDay.byDay].sort((a, b) => b.connectRate - a.connectRate)[0];
@@ -19,8 +33,52 @@ export default async function AnalyticsPage() {
         <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
           <BarChart3 size={20} className="text-accent-blue" /> Analytics
         </h1>
-        <p className="text-sm text-muted">What&apos;s actually working, based on every call you&apos;ve logged</p>
+        <p className="text-sm text-muted">
+          {isManager
+            ? "What's working across your whole team"
+            : "What's actually working, based on every call you've logged"}
+        </p>
       </div>
+
+      {isManager && (
+        <Card className="p-6">
+          <div className="flex items-center gap-2 mb-1">
+            <Trophy size={16} className="text-accent-orange" />
+            <h2 className="font-bold text-foreground">Team leaderboard</h2>
+          </div>
+          <p className="text-sm text-muted mb-4">Per caller, last 30 days</p>
+          {leaderboard.length === 0 ? (
+            <p className="text-sm text-muted-2">No calls logged in the last 30 days yet.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left text-muted-2 text-xs uppercase tracking-wide border-b border-border">
+                    <th className="py-2 pr-4 font-semibold">Caller</th>
+                    <th className="py-2 pr-4 font-semibold">Calls</th>
+                    <th className="py-2 pr-4 font-semibold">Connects</th>
+                    <th className="py-2 pr-4 font-semibold">Meetings</th>
+                    <th className="py-2 pr-4 font-semibold">Connect rate</th>
+                    <th className="py-2 pr-4 font-semibold">Meeting rate</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {leaderboard.map((r) => (
+                    <tr key={r.name}>
+                      <td className="py-2.5 pr-4 font-semibold text-foreground">{r.name}</td>
+                      <td className="py-2.5 pr-4 text-muted">{r.total}</td>
+                      <td className="py-2.5 pr-4 text-muted">{r.connects}</td>
+                      <td className="py-2.5 pr-4 text-muted">{r.meetings}</td>
+                      <td className="py-2.5 pr-4 text-muted">{r.connectRate}%</td>
+                      <td className="py-2.5 pr-4 text-muted">{r.meetingRate}%</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="p-6">

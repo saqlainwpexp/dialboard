@@ -12,10 +12,11 @@ type UserData = {
   dailyCallGoal: number;
 };
 
+const roleLabel = (role: string) => (role === "manager" ? "Manager" : "Caller");
+
 export default function SettingsPage() {
   const [user, setUser] = useState<UserData | null>(null);
   const [name, setName] = useState("");
-  const [role, setRole] = useState("");
   const [dailyCallGoal, setDailyCallGoal] = useState("60");
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileSaved, setProfileSaved] = useState(false);
@@ -32,7 +33,6 @@ export default function SettingsPage() {
       .then((d) => {
         setUser(d.user);
         setName(d.user.name);
-        setRole(d.user.role);
         setDailyCallGoal(String(d.user.dailyCallGoal));
       });
   }, []);
@@ -44,7 +44,7 @@ export default function SettingsPage() {
     await fetch("/api/user", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, role, dailyCallGoal: parseInt(dailyCallGoal, 10) }),
+      body: JSON.stringify({ name, dailyCallGoal: parseInt(dailyCallGoal, 10) }),
     });
     setSavingProfile(false);
     setProfileSaved(true);
@@ -88,7 +88,11 @@ export default function SettingsPage() {
             <input value={name} onChange={(e) => setName(e.target.value)} className={inputClass} />
           </Field>
           <Field label="Role">
-            <input value={role} onChange={(e) => setRole(e.target.value)} className={inputClass} />
+            <div className="flex items-center gap-2">
+              <span className={`${inputClass} flex items-center bg-background/50 text-muted cursor-default`}>
+                {roleLabel(user.role)}
+              </span>
+            </div>
           </Field>
           <Field label="Daily call goal">
             <input
@@ -147,20 +151,22 @@ export default function SettingsPage() {
         </form>
       </Card>
 
-      <Card className="p-6">
-        <h2 className="font-bold text-foreground mb-1 flex items-center gap-2">
-          <DatabaseBackup size={16} className="text-muted-2" /> Data backup
-        </h2>
-        <p className="text-sm text-muted mb-4">
-          Download everything — leads, call history, campaigns, and scripts — as a single JSON file.
-        </p>
-        <a
-          href="/api/export"
-          className="inline-block rounded-xl bg-accent-blue text-white text-sm font-semibold py-2.5 px-6 hover:opacity-90 transition"
-        >
-          Download full backup
-        </a>
-      </Card>
+      {user.role === "manager" && (
+        <Card className="p-6">
+          <h2 className="font-bold text-foreground mb-1 flex items-center gap-2">
+            <DatabaseBackup size={16} className="text-muted-2" /> Data backup
+          </h2>
+          <p className="text-sm text-muted mb-4">
+            Download everything — leads, call history, campaigns, and scripts — as a single JSON file.
+          </p>
+          <a
+            href="/api/export"
+            className="inline-block rounded-xl bg-accent-blue text-white text-sm font-semibold py-2.5 px-6 hover:opacity-90 transition"
+          >
+            Download full backup
+          </a>
+        </Card>
+      )}
     </div>
   );
 }

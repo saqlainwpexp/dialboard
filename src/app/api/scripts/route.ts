@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
+import { requireManager } from "@/lib/auth";
 import Script from "@/models/Script";
 import Call from "@/models/Call";
 
@@ -35,6 +36,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const guard = await requireManager();
+  if (guard.error) return guard.error;
+
   await connectDB();
   const body = await request.json();
 

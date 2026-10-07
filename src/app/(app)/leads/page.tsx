@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { Plus, Upload, Download, Search, PhoneCall, Trash2, X } from "lucide-react";
+import { Plus, Upload, Download, Search, PhoneCall, Trash2, X, Hand, UserCircle2 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { StatusBadge, PriorityBadge } from "@/components/ui/Badge";
 import { StaleBadge } from "@/components/ui/StaleBadge";
@@ -24,6 +24,7 @@ const STATUS_FILTERS = [
 ];
 
 type CampaignOption = { _id: string; name: string };
+type Member = { _id: string; name: string; role: string };
 
 export default function LeadsPage() {
   const [leads, setLeads] = useState<LeadRow[]>([]);
@@ -37,18 +38,33 @@ export default function LeadsPage() {
   const [campaigns, setCampaigns] = useState<CampaignOption[]>([]);
   const [bulkStatus, setBulkStatus] = useState("");
   const [bulkCampaign, setBulkCampaign] = useState("");
+  const [bulkAssign, setBulkAssign] = useState("");
   const [bulkBusy, setBulkBusy] = useState(false);
 
+  const [role, setRole] = useState<"manager" | "rep" | null>(null);
+  const [members, setMembers] = useState<Member[]>([]);
+  // Caller view: "mine" | "pool". Manager view: "all" | "pool" | a userId.
+  const [view, setView] = useState("");
+
+  const isManager = role === "manager";
+
   const load = useCallback(async () => {
+    if (!role) return;
     setLoading(true);
     const params = new URLSearchParams();
     if (search) params.set("search", search);
     if (status) params.set("status", status);
+    if (isManager) {
+      if (view === "pool") params.set("view", "pool");
+      else if (view && view !== "all") params.set("assignedTo", view);
+    } else {
+      params.set("view", view === "pool" ? "pool" : "mine");
+    }
     const res = await fetch(`/api/leads?${params.toString()}`);
     const data = await res.json();
     setLeads(data.leads ?? []);
     setLoading(false);
-  }, [search, status]);
+  }, [search, status, role, isManager, view]);
 
   useEffect(() => {
     const t = setTimeout(load, 250);
@@ -56,10 +72,26 @@ export default function LeadsPage() {
   }, [load]);
 
   useEffect(() => {
+    fetch("/api/user")
+      .then((r) => r.json())
+      .then((d) => {
+        const r = d.user?.role === "manager" ? "manager" : "rep";
+        setRole(r);
+        setView(r === "manager" ? "all" : "mine");
+      });
     fetch("/api/campaigns")
       .then((r) => r.json())
-      .then((d) => setCampaigns(d.campaigns ?? []));
+      .then((d) => setCampaigns(d.campaigns ?? []))
+      .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (role !== "manager") return;
+    fetch("/api/team")
+      .then((r) => r.json())
+      .then((d) => setMembers(d.team ?? []))
+      .catch(() => {});
+  }, [role]);
 
   useEffect(() => {
     setSelected(new Set());
@@ -126,6 +158,28 @@ export default function LeadsPage() {
     load();
   }
 
+  async function handleBulkAssign() {
+    if (!bulkAssign) return;
+    setBulkBusy(true);
+    await fetch("/api/leads/bulk", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: Array.from(selected), assignedTo: bulkAssign }),
+    });
+    setBulkBusy(false);
+    setBulkAssign("");
+    load();
+  }
+
+  async function handleClaim(id: string) {
+    const res = await fetch(`/api/leads/${id}/claim`, { method: "POST" });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      alert(data.error ?? "Could not claim this lead.");
+    }
+    load();
+  }
+
   function handleExport() {
     const rows = selected.size > 0 ? leads.filter((l) => selected.has(l._id)) : leads;
     downloadCsv(
@@ -162,12 +216,14 @@ export default function LeadsPage() {
           >
             <Download size={15} /> {selected.size > 0 ? `Export ${selected.size}` : "Export CSV"}
           </button>
-          <button
-            onClick={() => setImportOpen(true)}
-            className="flex items-center gap-2 bg-surface card-shadow rounded-full px-4 py-2.5 text-sm font-semibold text-foreground hover:opacity-80 transition"
-          >
-            <Upload size={15} /> Import CSV
-          </button>
+          {isManager && (
+            <button
+              onClick={() => setImportOpen(true)}
+              className="flex items-center gap-2 bg-surface card-shadow rounded-full px-4 py-2.5 text-sm font-semibold text-foreground hover:opacity-80 transition"
+            >
+              <Upload size={15} /> Import CSV
+            </button>
+          )}
           <button
             onClick={() => setAddOpen(true)}
             className="flex items-center gap-2 bg-accent-blue text-white rounded-full px-4 py-2.5 text-sm font-semibold hover:opacity-90 transition"
@@ -175,6 +231,33 @@ export default function LeadsPage() {
             <Plus size={15} /> Add lead
           </button>
         </div>
+      </div>
+
+      <div className="flex items-center gap-2 overflow-x-auto">
+        {(isManager
+          ? [
+              { value: "all", label: "All leads" },
+              { value: "pool", label: "Unassigned pool" },
+              ...members.map((m) => ({ value: m._id, label: m.name })),
+            ]
+          : [
+              { value: "mine", label: "My leads" },
+              { value: "pool", label: "Pool" },
+            ]
+        ).map((tab) => (
+          <button
+            key={tab.value}
+            onClick={() => setView(tab.value)}
+            className={
+              "px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition " +
+              (view === tab.value
+                ? "bg-accent-blue text-white"
+                : "bg-surface text-muted hover:text-foreground card-shadow")
+            }
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       <Card className="p-4 flex flex-wrap items-center gap-3">
@@ -200,9 +283,30 @@ export default function LeadsPage() {
         </select>
       </Card>
 
-      {selected.size > 0 && (
+      {selected.size > 0 && isManager && (
         <Card className="p-4 flex flex-wrap items-center gap-3 border-2 border-accent-blue/20">
           <span className="text-sm font-semibold text-foreground">{selected.size} selected</span>
+
+          <select
+            value={bulkAssign}
+            onChange={(e) => setBulkAssign(e.target.value)}
+            className="bg-background rounded-full px-4 py-2 text-sm outline-none text-foreground"
+          >
+            <option value="">Assign to…</option>
+            <option value="unassigned">Unassign (pool)</option>
+            {members.map((m) => (
+              <option key={m._id} value={m._id}>
+                {m.name}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={handleBulkAssign}
+            disabled={!bulkAssign || bulkBusy}
+            className="text-xs font-semibold text-accent-blue hover:underline disabled:opacity-40"
+          >
+            Apply
+          </button>
 
           <select
             value={bulkStatus}
@@ -273,14 +377,17 @@ export default function LeadsPage() {
               <th className="px-5 py-3 font-semibold">Status</th>
               <th className="px-5 py-3 font-semibold">Priority</th>
               <th className="px-5 py-3 font-semibold">Campaign</th>
+              <th className="px-5 py-3 font-semibold">Owner</th>
               <th className="px-5 py-3 font-semibold"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
             {!loading && leads.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-5 py-10 text-center text-muted-2">
-                  No leads yet. Add one or import a CSV to get started.
+                <td colSpan={8} className="px-5 py-10 text-center text-muted-2">
+                  {view === "pool"
+                    ? "No unassigned leads right now."
+                    : "No leads here yet."}
                 </td>
               </tr>
             )}
@@ -322,19 +429,39 @@ export default function LeadsPage() {
                 </td>
                 <td className="px-5 py-3 text-muted">{lead.campaign?.name ?? "—"}</td>
                 <td className="px-5 py-3">
+                  {lead.assignedTo ? (
+                    <span className="inline-flex items-center gap-1 text-muted">
+                      <UserCircle2 size={13} className="text-muted-2" />
+                      {lead.assignedTo.name}
+                    </span>
+                  ) : (
+                    <span className="text-xs font-semibold text-accent-orange">Unassigned</span>
+                  )}
+                </td>
+                <td className="px-5 py-3">
                   <div className="flex items-center justify-end gap-2">
+                    {!lead.assignedTo && (
+                      <button
+                        onClick={() => handleClaim(lead._id)}
+                        className="flex items-center gap-1.5 bg-accent-orange-soft text-accent-orange rounded-full px-3 py-1.5 text-xs font-semibold hover:opacity-80 transition"
+                      >
+                        <Hand size={12} /> Claim
+                      </button>
+                    )}
                     <button
                       onClick={() => setCallLead(lead)}
                       className="flex items-center gap-1.5 bg-accent-blue-soft text-accent-blue rounded-full px-3 py-1.5 text-xs font-semibold hover:opacity-80 transition"
                     >
                       <PhoneCall size={12} /> Log call
                     </button>
-                    <button
-                      onClick={() => handleDelete(lead._id)}
-                      className="w-8 h-8 rounded-full bg-background flex items-center justify-center text-muted hover:text-red-500 transition"
-                    >
-                      <Trash2 size={13} />
-                    </button>
+                    {isManager && (
+                      <button
+                        onClick={() => handleDelete(lead._id)}
+                        className="w-8 h-8 rounded-full bg-background flex items-center justify-center text-muted hover:text-red-500 transition"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>

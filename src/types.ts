@@ -1,4 +1,5 @@
 export type CampaignRef = { _id: string; name: string; color?: string } | null;
+export type UserRef = { _id: string; name: string } | null;
 
 export type AdditionalPhone = { label: string; number: string };
 export type CustomField = { key: string; value: string };
@@ -16,6 +17,7 @@ export type LeadRow = {
   status: string;
   priority: string;
   campaign: CampaignRef;
+  assignedTo: UserRef;
   notes: string;
   additionalPhones: AdditionalPhone[];
   customFields: CustomField[];
@@ -28,6 +30,7 @@ export type CallRow = {
   _id: string;
   lead: string;
   script: { _id: string; name: string } | null;
+  calledBy: UserRef;
   disposition: string;
   durationSeconds: number;
   objection: string | null;

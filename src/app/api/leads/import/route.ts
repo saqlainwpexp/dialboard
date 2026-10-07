@@ -1,13 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
+import { requireManager } from "@/lib/auth";
 import Lead from "@/models/Lead";
 import { normalizePhone } from "@/lib/phone";
 
 export async function POST(request: NextRequest) {
+  const guard = await requireManager();
+  if (guard.error) return guard.error;
+
   await connectDB();
   const body = await request.json();
   const rows = body.rows as Record<string, string>[];
   const campaign = body.campaign || null;
+  const assignedTo = body.assignedTo && body.assignedTo !== "unassigned" ? body.assignedTo : null;
 
   if (!Array.isArray(rows) || rows.length === 0) {
     return NextResponse.json({ error: "No rows to import." }, { status: 400 });
@@ -58,6 +63,7 @@ export async function POST(request: NextRequest) {
       industry: r.industry ?? "",
       timezone: r.timezone ?? "",
       campaign,
+      assignedTo,
     });
   }
 
