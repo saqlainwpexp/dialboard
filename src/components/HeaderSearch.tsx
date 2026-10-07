@@ -43,16 +43,16 @@ export function HeaderSearch() {
   }
 
   return (
-    <div ref={containerRef} className="relative hidden sm:block w-64">
-      <div className="flex items-center gap-2 bg-surface rounded-full px-4 py-2.5 card-shadow">
-        <Search size={16} className="text-muted-2 shrink-0" />
+    <div ref={containerRef} className="relative hidden sm:block w-56">
+      <div className="flex items-center gap-2 bg-surface rounded-lg px-3 py-2 card-shadow">
+        <Search size={15} className="text-muted-2 shrink-0" />
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => query.trim().length >= 2 && setOpen(true)}
           onKeyDown={(e) => e.key === "Escape" && setOpen(false)}
-          placeholder="Search leads by name, phone…"
-          className="bg-transparent text-sm outline-none placeholder:text-muted-2 w-full"
+          placeholder="Search leads…"
+          className="bg-transparent text-[13px] outline-none placeholder:text-muted-2 w-full"
         />
       </div>
 

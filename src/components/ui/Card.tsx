@@ -9,7 +9,7 @@ export function Card({
   className?: string;
 }) {
   return (
-    <div className={clsx("bg-surface rounded-3xl card-shadow", className)}>
+    <div className={clsx("bg-surface rounded-2xl card-shadow", className)}>
       {children}
     </div>
   );

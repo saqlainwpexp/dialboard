@@ -75,7 +75,7 @@ export default function LoginPage() {
             </div>
             <span className="text-xl font-bold text-foreground">DialBoard</span>
           </div>
-          <div className="bg-surface rounded-3xl card-shadow p-8">
+          <div className="bg-surface rounded-2xl card-shadow p-7">
             <h1 className="text-lg font-bold text-red-500 mb-1">Can&apos;t reach the database</h1>
             <p className="text-sm text-muted mb-4 break-words">{statusError}</p>
             <p className="text-xs text-muted-2 mb-4">
@@ -104,7 +104,7 @@ export default function LoginPage() {
           <span className="text-xl font-bold text-foreground">DialBoard</span>
         </div>
 
-        <div className="bg-surface rounded-3xl card-shadow p-8">
+        <div className="bg-surface rounded-2xl card-shadow p-7">
           <h1 className="text-lg font-bold text-foreground mb-1">
             {mode === "register" ? "Create your account" : "Welcome back"}
           </h1>

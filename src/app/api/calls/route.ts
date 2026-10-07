@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
+import { logActivity } from "@/lib/activity";
 import Call from "@/models/Call";
 import Lead from "@/models/Lead";
 
@@ -94,10 +95,26 @@ export async function POST(request: NextRequest) {
     nextActionAt: body.nextActionAt || null,
   });
 
+  const previousStatus = lead.status;
   lead.status = DISPOSITION_TO_STATUS[body.disposition] ?? lead.status;
   lead.lastCalledAt = new Date();
   lead.nextActionAt = body.nextActionAt || null;
   await lead.save();
+
+  // Audit: record a status change so the manager can see who moved a lead and
+  // how (e.g. a caller moving someone from Contacted to Not Interested).
+  if (lead.status !== previousStatus) {
+    await logActivity({
+      type: "status_change",
+      actorId: session.userId,
+      actorName: session.name,
+      leadId: lead._id.toString(),
+      leadName: lead.name,
+      from: previousStatus,
+      to: lead.status,
+      meta: { via: "call", disposition: body.disposition },
+    });
+  }
 
   return NextResponse.json({ call });
 }

@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
+import { logActivity } from "@/lib/activity";
 import Lead from "@/models/Lead";
 import Call from "@/models/Call";
+import User from "@/models/User";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -58,7 +60,40 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     delete body.assignedTo;
   }
 
+  const prevStatus = lead.status;
+  const prevAssignee = lead.assignedTo?.toString() ?? null;
+
   const lead2 = await Lead.findByIdAndUpdate(id, body, { new: true });
+
+  // Audit manual status changes and (re)assignments.
+  if (typeof body.status === "string" && body.status !== prevStatus) {
+    await logActivity({
+      type: "status_change",
+      actorId: session.userId,
+      actorName: session.name,
+      leadId: id,
+      leadName: lead.name,
+      from: prevStatus,
+      to: body.status,
+      meta: { via: "edit" },
+    });
+  }
+  if (body.assignedTo !== undefined) {
+    const nextAssignee = body.assignedTo || null;
+    if (nextAssignee !== prevAssignee) {
+      const assignee = nextAssignee ? await User.findById(nextAssignee).select("name").lean() : null;
+      await logActivity({
+        type: "assigned",
+        actorId: session.userId,
+        actorName: session.name,
+        leadId: id,
+        leadName: lead.name,
+        to: assignee?.name ?? "Unassigned",
+        meta: { via: "edit" },
+      });
+    }
+  }
+
   return NextResponse.json({ lead: lead2 });
 }
 

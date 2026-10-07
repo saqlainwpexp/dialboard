@@ -159,7 +159,7 @@ export default function FollowUpsPage() {
       {rescheduleLead && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/30" onClick={() => setRescheduleLead(null)} />
-          <div className="relative bg-surface rounded-3xl card-shadow p-6 w-full max-w-sm">
+          <div className="relative bg-surface rounded-2xl card-shadow p-6 w-full max-w-sm">
             <h2 className="font-bold text-foreground text-lg mb-4">
               Reschedule — {rescheduleLead.name}
             </h2>

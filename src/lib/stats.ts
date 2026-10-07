@@ -45,6 +45,7 @@ export async function getDashboardStats(dailyCallGoal: number, scope?: { userId?
       .sort({ nextActionAt: 1 })
       .limit(6)
       .populate("campaign", "name color")
+      .populate("assignedTo", "name")
       .lean(),
     Call.aggregate([
       { $match: { ...callScope, calledAt: { $gte: subDays(todayStart, 30) }, script: { $ne: null } } },
@@ -72,6 +73,14 @@ export async function getDashboardStats(dailyCallGoal: number, scope?: { userId?
       disposition: "meeting_booked",
     }),
   ]);
+
+  // Upcoming conversions: leads that booked a meeting, soonest first.
+  const upcomingMeetings = await Lead.find({ ...leadScope, status: "meeting_booked" })
+    .sort({ nextActionAt: 1, updatedAt: -1 })
+    .limit(6)
+    .populate("campaign", "name color")
+    .populate("assignedTo", "name")
+    .lean();
 
   const scriptIds = scriptAgg.map((s) => s._id);
   const scripts = await Script.find({ _id: { $in: scriptIds } }).lean();
@@ -109,8 +118,10 @@ export async function getDashboardStats(dailyCallGoal: number, scope?: { userId?
     callGoalProgress,
     connectRate,
     meetingRate,
+    meetings30d,
     chartData,
     upcomingFollowups,
+    upcomingMeetings,
     scriptPerformance,
   };
 }
