@@ -25,9 +25,20 @@ export async function POST(request: NextRequest) {
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
-  const user = await User.create({ name, email: email.toLowerCase().trim(), passwordHash });
+  // The very first account is the workspace owner, so it becomes the manager.
+  const user = await User.create({
+    name,
+    email: email.toLowerCase().trim(),
+    passwordHash,
+    role: "manager",
+  });
 
-  await createSession({ userId: user._id.toString(), email: user.email, name: user.name });
+  await createSession({
+    userId: user._id.toString(),
+    email: user.email,
+    name: user.name,
+    role: "manager",
+  });
 
   return NextResponse.json({ ok: true });
 }

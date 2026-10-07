@@ -25,6 +25,7 @@ const LeadSchema = new Schema(
     status: { type: String, enum: LEAD_STATUSES, default: "new" },
     priority: { type: String, enum: LEAD_PRIORITIES, default: "medium" },
     campaign: { type: Schema.Types.ObjectId, ref: "Campaign", default: null },
+    assignedTo: { type: Schema.Types.ObjectId, ref: "User", default: null },
     notes: { type: String, default: "" },
     lastCalledAt: { type: Date, default: null },
     nextActionAt: { type: Date, default: null },
@@ -43,6 +44,7 @@ const LeadSchema = new Schema(
 LeadSchema.index({ status: 1 });
 LeadSchema.index({ campaign: 1 });
 LeadSchema.index({ nextActionAt: 1 });
+LeadSchema.index({ assignedTo: 1 });
 
 export type Lead = InferSchemaType<typeof LeadSchema> & { _id: string };
 

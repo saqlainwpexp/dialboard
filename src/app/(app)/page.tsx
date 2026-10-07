@@ -19,7 +19,8 @@ export default async function DashboardPage() {
   const user = await User.findById(session.userId).lean();
   const dailyCallGoal = user?.dailyCallGoal ?? 60;
 
-  const stats = await getDashboardStats(dailyCallGoal);
+  const scope = session.role === "manager" ? undefined : { userId: session.userId };
+  const stats = await getDashboardStats(dailyCallGoal, scope);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -34,7 +35,7 @@ export default async function DashboardPage() {
                 {session!.name.charAt(0).toUpperCase()}
               </div>
               <div className="font-bold text-foreground">{session!.name}</div>
-              <div className="text-sm text-muted">{user?.role ?? "Sales Rep"}</div>
+              <div className="text-sm text-muted">{user?.role === "manager" ? "Manager" : "Caller"}</div>
             </div>
             <div className="flex items-center justify-center gap-2 mt-4 flex-wrap">
               <StatChip icon={<Users2 size={13} />} value={stats.totalLeads} />

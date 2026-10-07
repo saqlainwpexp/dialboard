@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
+import { requireManager } from "@/lib/auth";
 import Script from "@/models/Script";
 
 type Params = { params: Promise<{ id: string }> };
 
 export async function PATCH(request: NextRequest, { params }: Params) {
+  const guard = await requireManager();
+  if (guard.error) return guard.error;
+
   await connectDB();
   const { id } = await params;
   const body = await request.json();
@@ -16,6 +20,9 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 }
 
 export async function DELETE(_request: NextRequest, { params }: Params) {
+  const guard = await requireManager();
+  if (guard.error) return guard.error;
+
   await connectDB();
   const { id } = await params;
 

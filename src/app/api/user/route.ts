@@ -23,7 +23,9 @@ export async function PATCH(request: NextRequest) {
 
   const update: Record<string, unknown> = {};
   if (typeof body.name === "string" && body.name.trim()) update.name = body.name.trim();
-  if (typeof body.role === "string") update.role = body.role.trim();
+  // `role` is intentionally NOT updatable here — a user must never be able to
+  // promote themselves. Roles are managed only through the manager-only
+  // /api/team endpoints.
   if (typeof body.dailyCallGoal === "number" && body.dailyCallGoal > 0) {
     update.dailyCallGoal = body.dailyCallGoal;
   }

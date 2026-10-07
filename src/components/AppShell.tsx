@@ -2,13 +2,15 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutGrid, ListChecks, Users, Megaphone, FileText, LogOut, PhoneCall, History, CalendarClock, Settings, BarChart3, Workflow } from "lucide-react";
+import { LayoutGrid, ListChecks, Users, Megaphone, FileText, LogOut, PhoneCall, History, CalendarClock, Settings, BarChart3, Workflow, UsersRound } from "lucide-react";
 import clsx from "clsx";
 import { HeaderSearch } from "@/components/HeaderSearch";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { FollowUpBadge } from "@/components/FollowUpBadge";
 
-const NAV = [
+type NavItem = { href: string; label: string; icon: typeof LayoutGrid; managerOnly?: boolean };
+
+const NAV: NavItem[] = [
   { href: "/", label: "Dashboard", icon: LayoutGrid },
   { href: "/load-board", label: "Load Board", icon: ListChecks },
   { href: "/pipeline", label: "Pipeline", icon: Workflow },
@@ -18,14 +20,17 @@ const NAV = [
   { href: "/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/campaigns", label: "Campaigns", icon: Megaphone },
   { href: "/scripts", label: "Scripts", icon: FileText },
+  { href: "/team", label: "Team", icon: UsersRound, managerOnly: true },
 ];
 
 export function AppShell({
   children,
   userName,
+  role,
 }: {
   children: React.ReactNode;
   userName: string;
+  role: "manager" | "rep";
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -82,7 +87,7 @@ export function AppShell({
         </header>
 
         <nav className="flex items-center gap-2 mb-8 overflow-x-auto">
-          {NAV.map((item) => {
+          {NAV.filter((item) => !item.managerOnly || role === "manager").map((item) => {
             const active = pathname === item.href;
             const Icon = item.icon;
             return (

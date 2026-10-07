@@ -24,6 +24,7 @@ export const OBJECTIONS = [
 const CallSchema = new Schema(
   {
     lead: { type: Schema.Types.ObjectId, ref: "Lead", required: true },
+    calledBy: { type: Schema.Types.ObjectId, ref: "User", default: null },
     campaign: { type: Schema.Types.ObjectId, ref: "Campaign", default: null },
     script: { type: Schema.Types.ObjectId, ref: "Script", default: null },
     disposition: { type: String, enum: DISPOSITIONS, required: true },
@@ -39,6 +40,7 @@ const CallSchema = new Schema(
 CallSchema.index({ calledAt: -1 });
 CallSchema.index({ lead: 1 });
 CallSchema.index({ disposition: 1 });
+CallSchema.index({ calledBy: 1 });
 
 export type Call = InferSchemaType<typeof CallSchema> & { _id: string };
 

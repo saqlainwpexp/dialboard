@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
-import { getSession } from "@/lib/auth";
+import { requireManager } from "@/lib/auth";
 import Lead from "@/models/Lead";
 import Call from "@/models/Call";
 import Campaign from "@/models/Campaign";
 import Script from "@/models/Script";
 
 export async function GET() {
-  const session = await getSession();
-  if (!session) return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
+  const guard = await requireManager();
+  if (guard.error) return guard.error;
 
   await connectDB();
 
