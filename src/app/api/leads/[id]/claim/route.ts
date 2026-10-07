@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
+import { logActivity } from "@/lib/activity";
 import Lead from "@/models/Lead";
 
 type Params = { params: Promise<{ id: string }> };
@@ -33,6 +34,15 @@ export async function POST(_request: NextRequest, { params }: Params) {
   if (result.modifiedCount === 0) {
     return NextResponse.json({ error: "Someone already claimed this lead." }, { status: 409 });
   }
+
+  await logActivity({
+    type: "claimed",
+    actorId: session.userId,
+    actorName: session.name,
+    leadId: id,
+    leadName: lead.name,
+    to: session.name,
+  });
 
   return NextResponse.json({ ok: true });
 }

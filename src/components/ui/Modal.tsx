@@ -30,7 +30,7 @@ export function Modal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/30" onClick={onClose} />
-      <div className={`relative bg-surface rounded-3xl card-shadow p-6 w-full ${width} max-h-[85vh] overflow-y-auto`}>
+      <div className={`relative bg-surface rounded-2xl card-shadow p-6 w-full ${width} max-h-[85vh] overflow-y-auto`}>
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-bold text-foreground text-lg">{title}</h2>
           <button

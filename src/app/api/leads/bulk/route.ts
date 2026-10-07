@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { requireManager } from "@/lib/auth";
+import { logActivity } from "@/lib/activity";
 import Lead from "@/models/Lead";
 import Call from "@/models/Call";
+import User from "@/models/User";
 
 export async function PATCH(request: NextRequest) {
   const guard = await requireManager();
@@ -29,7 +31,45 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: "No changes specified." }, { status: 400 });
   }
 
+  // Snapshot before the update so we can audit what actually changed.
+  const before = await Lead.find({ _id: { $in: ids } }).select("name status assignedTo").lean();
+
   const result = await Lead.updateMany({ _id: { $in: ids } }, update);
+
+  const actor = { actorId: guard.session.userId, actorName: guard.session.name };
+  if (update.status) {
+    for (const l of before) {
+      if (l.status !== update.status) {
+        await logActivity({
+          type: "status_change",
+          ...actor,
+          leadId: l._id.toString(),
+          leadName: l.name,
+          from: l.status,
+          to: update.status as string,
+          meta: { via: "bulk" },
+        });
+      }
+    }
+  }
+  if (body.assignedTo !== undefined) {
+    const nextId = (update.assignedTo as string | null) ?? null;
+    const assignee = nextId ? await User.findById(nextId).select("name").lean() : null;
+    const nextName = assignee?.name ?? "Unassigned";
+    for (const l of before) {
+      if ((l.assignedTo?.toString() ?? null) !== nextId) {
+        await logActivity({
+          type: "assigned",
+          ...actor,
+          leadId: l._id.toString(),
+          leadName: l.name,
+          to: nextName,
+          meta: { via: "bulk" },
+        });
+      }
+    }
+  }
+
   return NextResponse.json({ updated: result.modifiedCount });
 }
 

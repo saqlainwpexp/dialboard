@@ -39,9 +39,9 @@ export function ThemeToggle() {
     <button
       onClick={cycle}
       title={`Theme: ${theme} (click to change)`}
-      className="w-10 h-10 rounded-full bg-surface card-shadow flex items-center justify-center text-muted hover:text-foreground transition"
+      className="w-9 h-9 rounded-lg bg-surface card-shadow flex items-center justify-center text-muted hover:text-foreground transition"
     >
-      <Icon size={16} />
+      <Icon size={15} />
     </button>
   );
 }

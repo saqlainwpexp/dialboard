@@ -70,7 +70,7 @@ export default function PipelinePage() {
                 }}
                 onDragLeave={() => setDragOverStatus(null)}
                 onDrop={(e) => handleDrop(col.status, e)}
-                className={`w-72 shrink-0 rounded-3xl p-3 transition ${
+                className={`w-72 shrink-0 rounded-2xl p-3 transition ${
                   dragOverStatus === col.status ? "bg-accent-blue-soft" : "bg-surface"
                 } card-shadow`}
               >
